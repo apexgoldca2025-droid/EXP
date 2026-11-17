@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAFMA - Fuerzas, Velocidad y Mach</title>
+  <style>
+    :root {
+      --blue: #0284c7;
+      --blue-light: #e0f2fe;
+      --blue-soft: #f0f9ff;
+      --blue-border: #bae6fd;
+      --card-bg: #f8fafc;
+      --text: #000000;
+      --text-muted: #334155;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #ffffff;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: var(--blue);
+    }
+
+    .badge {
+      background: var(--blue-light);
+      color: var(--blue);
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    main {
+      flex: 1;
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 0 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .px {
+      padding: 0 24px;
+    }
+
+    h1 {
+      font-size: clamp(1.6rem, 3vw, 2.3rem);
+      font-weight: 800;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: clamp(1.35rem, 2.5vw, 1.8rem);
+      font-weight: 800;
+      color: var(--blue);
+      margin-bottom: 10px;
+    }
+
+    .lead {
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    .center {
+      text-align: center;
+      max-width: 680px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .visual-box {
+      width: 100%;
+      height: clamp(220px, 38vh, 360px);
+      background: var(--blue-soft);
+      margin: 16px 0;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+
+    .visual-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 16px 20px;
+      border: 1px solid #eef2f6;
+    }
+
+    .card-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .card-desc {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    @media (max-width: 560px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+      .visual-box {
+        border-radius: 0;
+      }
+    }
+
+    .example-card {
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 18px;
+      text-align: center;
+      border: 1px solid #eef2f6;
+    }
+
+    .example-card .title {
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .example-card .val {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--blue);
+    }
+
+    .explorer-card {
+      background: var(--blue-soft);
+      border-radius: 18px;
+      padding: 24px;
+      border: 1px solid var(--blue-border);
+      text-align: center;
+    }
+
+    .vehicle-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--blue-border);
+      margin-bottom: 16px;
+    }
+
+    .metrics {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 4px;
+    }
+
+    .metric-value {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--blue);
+    }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .circle-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid var(--blue-border);
+      background: #ffffff;
+      color: var(--blue);
+      font-size: 1.4rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.1s, background 0.15s;
+    }
+
+    .circle-btn:hover {
+      background: var(--blue-light);
+    }
+
+    .circle-btn:active {
+      transform: scale(0.94);
+    }
+
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--blue);
+      height: 8px;
+      cursor: pointer;
+    }
+
+    footer {
+      position: sticky;
+      bottom: 0;
+      background: #ffffff;
+      border-top: 1px solid var(--border);
+      padding: 14px 24px;
+    }
+
+    .nav-bar {
+      max-width: 960px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 46px;
+      padding: 0 20px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .nav-btn:not(:disabled):active {
+      transform: scale(0.97);
+    }
+
+    .btn-prev {
+      background: var(--blue-light);
+      color: var(--blue);
+    }
+
+    .btn-next {
+      background: var(--blue);
+      color: #ffffff;
+    }
+
+    .dots {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dot.active {
+      width: 13px;
+      height: 13px;
+      background: var(--blue);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+      </svg>
+      <span>CAFMA</span>
+    </div>
+    <div class="badge" id="slideBadge">1/5</div>
+  </header>
+
+  <main>
+    <!-- Diapositiva 1: Portada -->
+    <section class="slide active" id="slide-0">
+      <div class="px">
+        <div class="visual-box">
+          <img
+            src="app/src/main/res/drawable/img_venezuelan_fleet.jpg"
+            onerror="this.onerror=null; this.src='img_venezuelan_fleet.jpg';"
+            alt="Flota de aeronaves venezolanas Sukhoi, F-16 y K-8"
+          />
+        </div>
+        <h1>Fuerzas, Velocidad y Mach</h1>
+        <p class="lead center">
+          Una clase visual y sencilla para entender cómo vuelan los aviones y qué tan rápido se desplazan, con referencia a nuestra Aviación Militar.
+        </p>
+      </div>
+    </section>
+
+    <!-- Diapositiva 2: Fuerzas en el aire -->
+    <section class="slide" id="slide-1">
+      <div class="px">
+        <h2>¿Cómo se mantiene un avión en el aire?</h2>
+        <p class="lead">
+          Imagina que sacas la mano por la ventana de un carro en movimiento: sientes cómo el viento empuja tu mano hacia arriba y hacia atrás. Con los aviones pasa exactamente igual.
+        </p>
+
+        <div class="visual-box">
+          <img
+            src="app/src/main/res/drawable/forces_flight_es.jpg"
+            onerror="this.onerror=null; this.src='forces_flight_es.jpg';"
+            alt="Fuerzas de vuelo en español"
+          />
+        </div>
+
+        <div class="stack">
+          <div class="card">
+            <div class="card-title">1. El impulso hacia adelante</div>
+            <div class="card-desc">Los motores empujan el avión con mucha fuerza para que avance rápido.</div>
+          </div>
+          <div class="card">
+            <div class="card-title">2. El aire levanta las alas</div>
+            <div class="card-desc">Al avanzar rápido, el aire pasa por las alas y empuja el avión hacia arriba.</div>
+          </div>
+          <div class="card">
+            <div class="card-title">3. Mantenerse en equilibrio</div>
+            <div class="card-desc">El avión flota en el aire gracias a que el motor lo empuja y las alas lo sostienen.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Diapositiva 3: ¿Qué es la Velocidad? -->
+    <section class="slide" id="slide-2">
+      <div class="px">
+        <h2>¿Qué es la Velocidad?</h2>
+        <p class="lead">
+          Es simplemente qué tan rápido te toma llegar de un lugar a otro. Entre menos tiempo te demores en recorrer una distancia, mayor es tu velocidad.
+        </p>
+
+        <div class="visual-box">
+          <img
+            src="app/src/main/res/drawable/img_speed_sukhoi.jpg"
+            onerror="this.onerror=null; this.src='img_speed_sukhoi.jpg';"
+            alt="Avión Sukhoi a gran velocidad"
+          />
+        </div>
+
+        <div class="grid-2">
+          <div class="example-card">
+            <div class="title">Caminar tranquilo</div>
+            <div class="val">Despacio (5 km/h)</div>
+          </div>
+          <div class="example-card">
+            <div class="title">Viajar en carro</div>
+            <div class="val">Rápido (100 km/h)</div>
+          </div>
+          <div class="example-card">
+            <div class="title">Tren Bala</div>
+            <div class="val">Muy rápido (300 km/h)</div>
+          </div>
+          <div class="example-card">
+            <div class="title">Un Avión Comercial</div>
+            <div class="val">Velocidad de viaje (900 km/h)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Diapositiva 4: ¿Qué es la Velocidad Mach? -->
+    <section class="slide" id="slide-3">
+      <div class="px">
+        <h2>¿Qué es la Velocidad Mach?</h2>
+        <p class="lead">
+          Es la forma en que medimos cuando algo va <strong>más rápido que su propio sonido</strong>.
+        </p>
+
+        <div class="visual-box">
+          <img
+            src="app/src/main/res/drawable/img_mach_speed.jpg"
+            onerror="this.onerror=null; this.src='img_mach_speed.jpg';"
+            alt="Velocidad Mach"
+          />
+        </div>
+
+        <div class="stack">
+          <div class="card">
+            <div class="card-title">Imagina un trueno o un látigo</div>
+            <div class="card-desc">
+              Cuando sacudes un látigo suena un chasquido: ¡eso es el sonido viajando! Cuando un avión de combate vuela tan rápido que deja atrás el sonido, se dice que rompe la barrera del sonido.
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Mach 1, Mach 2...</div>
+            <div class="card-desc">
+              • Mach 1 = Ir exactamente a la velocidad del sonido (~1,235 km/h).<br/>
+              • Mach 2 = Ir al doble de la velocidad del sonido.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Diapositiva 5: Explorador interactivo -->
+    <section class="slide" id="slide-4">
+      <div class="px">
+        <h2>¡Explorador de Velocidades y Mach!</h2>
+        <p class="lead">
+          Usa los botones de menos (-) y más (+) o mueve la barra para recorrer en secuencia las imágenes y sus respectivas velocidades.
+        </p>
+
+        <div class="visual-box">
+          <img
+            id="dynamicImage"
+            src="app/src/main/res/drawable/img_speed_car.jpg"
+            alt="Vehículo según velocidad"
+          />
+        </div>
+
+        <div class="explorer-card">
+          <div class="vehicle-title" id="vehicleTitle">Un Automóvil en Autopista</div>
+          <div class="divider"></div>
+          <div class="metrics">
+            <div>
+              <div class="metric-label">Velocidad</div>
+              <div class="metric-value" id="kmhDisplay">100 km/h</div>
+            </div>
+            <div>
+              <div class="metric-label">Número Mach</div>
+              <div class="metric-value" id="machDisplay">Mach 0.08</div>
+            </div>
+          </div>
+
+          <div class="slider-row">
+            <button class="circle-btn" id="minusBtn" aria-label="Reducir velocidad">−</button>
+            <input type="range" id="speedSlider" min="10" max="6000" value="100" />
+            <button class="circle-btn" id="plusBtn" aria-label="Aumentar velocidad">+</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="nav-bar">
+      <button class="nav-btn btn-prev" id="prevBtn" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="transform: rotate(270deg);">
+          <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+        </svg>
+        <span>Anterior</span>
+      </button>
+
+      <div class="dots" id="dotsContainer"></div>
+
+      <button class="nav-btn btn-next" id="nextBtn">
+        <span>Siguiente</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="transform: rotate(90deg);">
+          <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+        </svg>
+      </button>
+    </div>
+  </footer>
+
+  <script>
+    const totalSlides = 5;
+    let currentSlide = 0;
+
+    const slides = document.querySelectorAll('.slide');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const slideBadge = document.getElementById('slideBadge');
+    const dotsContainer = document.getElementById('dotsContainer');
+
+    for (let i = 0; i < totalSlides; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => goToSlide(i));
+      dotsContainer.appendChild(dot);
+    }
+
+    function goToSlide(index) {
+      if (index < 0 || index >= totalSlides) return;
+      slides[currentSlide].classList.remove('active');
+      currentSlide = index;
+      slides[currentSlide].classList.add('active');
+      slideBadge.textContent = `${currentSlide + 1}/${totalSlides}`;
+      prevBtn.disabled = currentSlide === 0;
+      nextBtn.disabled = currentSlide === totalSlides - 1;
+
+      document.querySelectorAll('.dot').forEach((d, i) => {
+        d.classList.toggle('active', i === currentSlide);
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+    nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') goToSlide(currentSlide + 1);
+      if (e.key === 'ArrowLeft') goToSlide(currentSlide - 1);
+    });
+
+    const slider = document.getElementById('speedSlider');
+    const minusBtn = document.getElementById('minusBtn');
+    const plusBtn = document.getElementById('plusBtn');
+    const kmhDisplay = document.getElementById('kmhDisplay');
+    const machDisplay = document.getElementById('machDisplay');
+    const vehicleTitle = document.getElementById('vehicleTitle');
+    const dynamicImage = document.getElementById('dynamicImage');
+
+    function setDynamicImg(filename, altText) {
+      dynamicImage.alt = altText;
+      dynamicImage.onerror = () => {
+        dynamicImage.onerror = null;
+        dynamicImage.src = filename;
+      };
+      dynamicImage.src = 'app/src/main/res/drawable/' + filename;
+    }
+
+    function updateSpeedUI() {
+      const speed = Number(slider.value);
+      const mach = speed / 1235;
+      kmhDisplay.textContent = `${speed} km/h`;
+      machDisplay.textContent = `Mach ${mach.toFixed(2)}`;
+
+      let title = '';
+      let imgFile = '';
+
+      if (speed < 25) {
+        title = 'Una Persona Trotando';
+        imgFile = 'img_speed_person.jpg';
+      } else if (speed < 60) {
+        title = 'Una Bicicleta o Moto Urbana';
+        imgFile = 'img_speed_bike.jpg';
+      } else if (speed < 180) {
+        title = 'Un Automóvil en Autopista';
+        imgFile = 'img_speed_car.jpg';
+      } else if (speed < 1000) {
+        title = 'Un Avión Comercial de Pasajeros';
+        imgFile = 'img_speed_airliner.jpg';
+      } else if (speed < 2000) {
+        title = 'Avión Caza Militar (Sukhoi / F-16)';
+        imgFile = 'img_speed_sukhoi.jpg';
+      } else if (speed < 4000) {
+        title = 'Avión Supersónico de Alto Rendimiento';
+        imgFile = 'img_mach_speed.jpg';
+      } else {
+        title = 'Cohete Espacial / Vuelo Hipersónico';
+        imgFile = 'img_speed_rocket.jpg';
+      }
+
+      vehicleTitle.textContent = title;
+      setDynamicImg(imgFile, title);
+    }
+
+    slider.addEventListener('input', updateSpeedUI);
+    minusBtn.addEventListener('click', () => {
+      slider.value = Math.max(10, Number(slider.value) - 150);
+      updateSpeedUI();
+    });
+    plusBtn.addEventListener('click', () => {
+      slider.value = Math.min(6000, Number(slider.value) + 150);
+      updateSpeedUI();
+    });
+
+    updateSpeedUI();
+  </script>
+</body>
+</html>
