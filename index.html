@@ -90,6 +90,15 @@
       padding: 0 24px;
     }
 
+    /* Marco tipo tarjeta blanca para la diapositiva de portada */
+    .cover-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px 28px 32px;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+    }
+
     h1 {
       font-size: clamp(1.6rem, 3vw, 2.3rem);
       font-weight: 800;
@@ -117,21 +126,27 @@
       max-width: 680px;
       margin-left: auto;
       margin-right: auto;
+      margin-bottom: 0;
     }
 
     .visual-box {
       width: 100%;
       height: clamp(220px, 38vh, 360px);
       background: var(--blue-soft);
-      margin: 16px 0;
+      margin: 0 0 22px 0;
       overflow: hidden;
       border-radius: 16px;
+    }
+
+    .slide:not(#slide-0) .visual-box {
+      margin: 16px 0;
     }
 
     .visual-box img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      object-position: center;
       display: block;
     }
 
@@ -172,7 +187,10 @@
         grid-template-columns: 1fr;
       }
       .visual-box {
-        border-radius: 0;
+        border-radius: 12px;
+      }
+      .cover-card {
+        padding: 16px 16px 24px;
       }
     }
 
@@ -359,17 +377,19 @@
     <!-- Diapositiva 1: Portada -->
     <section class="slide active" id="slide-0">
       <div class="px">
-        <div class="visual-box">
-          <img
-            src="app/src/main/res/drawable/img_venezuelan_fleet.jpg"
-            onerror="this.onerror=null; this.src='img_venezuelan_fleet.jpg';"
-            alt="Flota de aeronaves venezolanas Sukhoi, F-16 y K-8"
-          />
+        <div class="cover-card">
+          <div class="visual-box">
+            <img
+              src="541689.jpg"
+              onerror="if(!this.dataset.tried){this.dataset.tried='1';this.src='app/src/main/res/drawable/541689.jpg';}else if(this.dataset.tried==='1'){this.dataset.tried='2';this.src='app/src/main/res/drawable/img_venezuelan_fleet.jpg';}else{this.onerror=null;this.src='img_venezuelan_fleet.jpg';}"
+              alt="Sukhoi Su-30MK2 0564 de la Aviación Militar Bolivariana"
+            />
+          </div>
+          <h1>Fuerzas, Velocidad y Mach</h1>
+          <p class="lead center">
+            Una clase visual y sencilla para entender cómo vuelan los aviones y qué tan rápido se desplazan, con referencia a nuestra Aviación Militar.
+          </p>
         </div>
-        <h1>Fuerzas, Velocidad y Mach</h1>
-        <p class="lead center">
-          Una clase visual y sencilla para entender cómo vuelan los aviones y qué tan rápido se desplazan, con referencia a nuestra Aviación Militar.
-        </p>
       </div>
     </section>
 
